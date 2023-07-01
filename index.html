@@ -20,7 +20,8 @@
           });
           detector.addEventListener("change", () => {
             console.error(detector.screenState);
-            new Notification(detector.screenState)
+            new Notification(detector.screenState);
+            alert(detector.screenState);
           });
         }
       }

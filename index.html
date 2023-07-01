@@ -6,32 +6,46 @@
   <title>Idle detection screen demo</title>
   <script type="module">
     const startButton = document.querySelector("#start");
-    const dialog = document.querySelector("#logoutConfirmation");
+    const receiveMessageButton = document.querySelector("#receiveMessage");
     const text = document.querySelector("#text");
+
+    let detector = null;
+
     startButton.addEventListener("click", async () => {
       try {
         const permission = await IdleDetector.requestPermission();
         await Notification.requestPermission();
         if (permission === "granted") {
-          text.innerText = "Do nothing for 60 seconds, and you will see a popup";
-          const detector = new IdleDetector();
+          text.innerText = "Wait to see an alert or fast block the computer to hear the notification";
+          detector = new IdleDetector();
           await detector.start({
-            threshold: 60_000,
-          });
-          detector.addEventListener("change", () => {
-            console.error(detector.screenState);
-            new Notification(detector.screenState);
-            alert(detector.screenState);
+            threshold: 70_000,
           });
         }
       }
       catch (e) {
         alert(e)
       }
+    });
+
+    let i = 0;
+    receiveMessageButton.addEventListener("click", () => {
+      setTimeout(() => {
+        i++;
+        const message = `Hello my friend ${i}`;
+        if (detector.screenState === "locked") {
+          new Notification(message, {
+            tag: message,
+          });
+        }
+        else {
+          alert(message);
+        }
+      }, 20_000);
     })
   </script>
 </head>
-<body style="padding: 32px">
+<body style="padding: 32px; max-width: 360px">
 <main>
   <header>
     <h1>Idle detection demo</h1>
@@ -40,12 +54,37 @@
   </header>
   <article>
     <button id="start">Click to start idle detection</button>
+    <br>
+    <br>
+    <button id="receiveMessage">Receive message in 20 seconds</button>
     <br><br>
     <p id="text"></p>
+    <p>
+      To see regular behaviour just click start button and then receive message button. Then wait 20 seconds and you'll see the alert.
+      <br>
+      <br>
+      To see Idle Detection in action you need to:
+      <ol>
+        <li>Click receive button</li>
+        <li>Block the screen faster than in 20 seconds</li>
+      </ol>
+      Then, seeing a login screen on your device after a few seconds you should hear a notification sound.
+      It is very useful for situations, when user locked screen or is doing something and device locked screen itself, but something important happened and user needs to react.
+      <p>
+        <strong>Locked screen needs to stay for a while to wait for the notification, so please check your settings and adjust them correctly</strong>
+      </p>
+      <div>
+        <figure style="margin: 0">
+          <img src="settings.png" alt="Settings needed for Idle Detection API to work" style="max-width: 640px;">
+          <figcaption>
+            Time to put device to sleep must be longer than time to turn of the screen
+          </figcaption>
+        </figure>
+      </div>
+      <br><br>
+      <strong>In case of any issues, <a href="https://www.linkedin.com/in/rados%C5%82aw-anuszewski-29093613b/" rel="noopener noreferrer">contact me on Linkedin</a></strong>
+    </p>
   </article>
-  <dialog id="logoutConfirmation">
-    Seems like you weren't active, so we logged you out
-  </dialog>
 </main>
 </body>
 </html>

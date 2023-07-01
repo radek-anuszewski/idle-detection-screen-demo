@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Idle detection screen demo</title>
+  <script type="module">
+    const startButton = document.querySelector("#start");
+    const dialog = document.querySelector("#logoutConfirmation");
+    const text = document.querySelector("#text");
+    startButton.addEventListener("click", async () => {
+      try {
+        const permission = await IdleDetector.requestPermission();
+        await Notification.requestPermission();
+        if (permission === "granted") {
+          text.innerText = "Do nothing for 60 seconds, and you will see a popup";
+          const detector = new IdleDetector();
+          await detector.start({
+            threshold: 60_000,
+          });
+          detector.addEventListener("change", () => {
+            console.error(detector.screenState);
+            new Notification(detector.screenState)
+          });
+        }
+      }
+      catch (e) {
+        alert(e)
+      }
+    })
+  </script>
+</head>
+<body style="padding: 32px">
+<main>
+  <header>
+    <h1>Idle detection demo</h1>
+    <a href="https://github.com/radek-anuszewski/idle-detection-screen-demo" target="_blank" rel="noopener noreferrer">Check code on Github</a>
+    <br><br>
+  </header>
+  <article>
+    <button id="start">Click to start idle detection</button>
+    <br><br>
+    <p id="text"></p>
+  </article>
+  <dialog id="logoutConfirmation">
+    Seems like you weren't active, so we logged you out
+  </dialog>
+</main>
+</body>
+</html>
